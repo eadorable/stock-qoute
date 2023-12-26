@@ -17,8 +17,10 @@ gem "bootsnap", require: false
 gem 'bootstrap', '~> 5.3', '>= 5.3.2'
 gem 'sassc-rails'
 
-# gem "webpacker", "~> 6.0"
+gem 'dotenv-rails', groups: [:development, :test]
 
+# gem 'httparty'
+# gem "webpacker", "~> 6.0"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
