@@ -1,6 +1,16 @@
-<h1>Home#index</h1>
-<p>Find me in app/views/home/index.html.erb</p>
-<br>
-<%= @stock_name %>
-<br>
-<%= @stock_price %>
+<h1>Stock Quote</h1>
+
+<%= form_with(url: root_path, method: :get) do |form| %>
+    <%= form.label :ticker, 'Stock Ticker:' %>
+    <%= form.text_field :ticker, placeholder: "Enter stock ticker" %>
+    <%= form.submit 'Lookup' %>
+<% end %>
+
+<% if @empty %>
+  <%= @empty %>
+<% elsif @error %>
+  <%= @error %>
+<% else %>
+  <h2><%= "#{@stock_symbol}" %> <small>(<%=@stock_name  %>)</small></h2>
+  <p>$<%= @stock_price %></p>
+<% end %>

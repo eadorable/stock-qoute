@@ -18,6 +18,7 @@ gem 'bootstrap', '~> 5.3', '>= 5.3.2'
 gem 'sassc-rails'
 
 gem 'dotenv-rails', groups: [:development, :test]
+gem 'simple_form'
 
 # gem 'httparty'
 # gem "webpacker", "~> 6.0"

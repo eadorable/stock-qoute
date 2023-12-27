@@ -1,20 +1,42 @@
 class HomeController < ApplicationController
+  require 'uri'
+  require 'net/http'
+  require 'json'
+  require 'open-uri'
 
   def about
   end
 
   def index
-    ticker = 'aapl' # Replace with the stock symbol you want to fetch
-    symbol = ticker.upcase
-    polygon_service = PolygonService.new(ENV['POLYGON_API_KEY'])
-    @quote = polygon_service.get_stock_quote(symbol)
+    @stock_info = fetch_stock_quote(params[:ticker]) # call fetch_stock_quote method
 
-    if @quote && @quote['results'].present? && @quote['results'][0]['T'].present? && @quote['results'][0]['c'].present?
-      @stock_name = @quote['results'][0]['T']
-      @stock_price = @quote['results'][0]['c']
+    # error handling
+    if params[:ticker] == ""
+      @empty = "No symbol entered"
+    elsif @stock_info == "{\"quoteResponse\":{\"result\":[],\"error\":null}}" # if invalid symbol
+      @error = "Invalid symbol"
     else
-      flash.now[:alert] = 'Error fetching stock quote. Please check the stock symbol.'
+      @stock_json = JSON.parse(@stock_info)
+      @stock_symbol = @stock_json['quoteResponse']['result'][0]['symbol']
+      @stock_name = @stock_json['quoteResponse']['result'][0]['shortName']
+      @stock_price = @stock_json['quoteResponse']['result'][0]['regularMarketPrice']
     end
-
   end
+end
+
+private
+
+def fetch_stock_quote(ticker)
+
+  url = URI("https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&symbols=#{ticker}")
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Get.new(url)
+  request["X-RapidAPI-Key"] = ENV['RAPIDAPI_KEY'] # from .env file
+  request["X-RapidAPI-Host"] = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
+
+  response = http.request(request)
+  response_read = response.read_body
 end
