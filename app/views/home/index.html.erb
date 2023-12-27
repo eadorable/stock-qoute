@@ -1,5 +1,3 @@
-<h1>Stock Quote</h1>
-
 <%= form_with(url: root_path, method: :get) do |form| %>
     <%= form.label :ticker, 'Stock Ticker:' %>
     <%= form.text_field :ticker, placeholder: "Enter stock ticker" %>
