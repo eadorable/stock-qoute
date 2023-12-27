@@ -19,7 +19,6 @@ gem 'sassc-rails'
 
 gem 'dotenv-rails', groups: [:development, :test]
 gem 'simple_form'
-
 # gem 'httparty'
 # gem "webpacker", "~> 6.0"
 
@@ -37,3 +36,5 @@ group :test do
   gem "selenium-webdriver"
 
 end
+
+gem "devise", "~> 4.9"
