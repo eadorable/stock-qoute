@@ -11,7 +11,7 @@ class HomeController < ApplicationController
     @stock_info = fetch_stock_quote(params[:ticker]) # call fetch_stock_quote method
 
     # error handling
-    if params[:ticker].empty? # if no symbol entered
+    if params[:ticker].nil? # if no symbol entered
       @empty = "No symbol entered"
     elsif @stock_info == "{\"quoteResponse\":{\"result\":[],\"error\":null}}" || @stock_info.nil?  # if symbol entered is invalid
       @error = "Invalid symbol"

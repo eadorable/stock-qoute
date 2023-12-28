@@ -14,8 +14,7 @@
     <div>
       <%= render "home/navbar" %>
       <div class="container">
-        <p class="notice"><%= notice %></p>
-        <p class="alert"><%= alert %></p>
+        <%= render "home/flash" %>
         <%= yield %>
       </div>
       <%= render "home/footer" %>
