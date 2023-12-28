@@ -9,6 +9,9 @@ class HomeController < ApplicationController
 
   def index
     @stock_info = fetch_stock_quote(params[:ticker]) # call fetch_stock_quote method
+    if @stock_info.nil?
+      @error = "Check your internet connection"
+    end
 
     # error handling
     if params[:ticker].nil? # if no symbol entered
@@ -33,6 +36,7 @@ def fetch_stock_quote(ticker)
   http = Net::HTTP.new(url.host, url.port)
   http.use_ssl = true
 
+  # need to setup error handling for when the API or internet is down
   request = Net::HTTP::Get.new(url)
   request["X-RapidAPI-Key"] = ENV['RAPIDAPI_KEY'] # from .env file
   request["X-RapidAPI-Host"] = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
