@@ -1,10 +1,14 @@
-<h1>Stocks</h1>
+<h1>Portfolio</h1>
 <table class="table table-hover table-striped table-bordered">
   <thead class="thead-dark">
     <tr>
-      <th>Company</th>
       <th>Ticker</th>
-      <th>Latest Price</th>
+      <th>Last Price</th>
+      <th>Buy Price</th>
+      <th>Cost</th>
+      <th>Shares</th>
+      <th>Value</th>
+      <th>P/L</th>
       <th>Action</th>
     </tr>
   </thead>
@@ -12,16 +16,43 @@
     <% @stocks.each do |stock| %>
       <% if stock.user_id == current_user.id %>
         <% if stock.ticker.present? %>
-          <% @stock_info = PolygonService.fetch_quote(stock.ticker) %>
-          <% stock.name = @stock_info[:symbol] %>
-          <% stock.ticker = @stock_info[:symbol] %>
-          <% stock.price = @stock_info[:price] %>
+          <% share = stock.investment/stock.buy_price %>
+          <% value = stock.price * share %>
+          <% profit_loss = value - stock.investment %>
+          <tr>
+            <td><%= stock.ticker.upcase %></td>
+            <td><%= number_to_currency(stock.price) %></td>
+            <td><%= number_to_currency(stock.buy_price) %></td>
+            <td><%= number_to_currency(stock.investment) %></td>
+            <td><%= number_to_human(share) %></td>
+            <td><%= number_to_currency(value) %></td>
+            <% if profit_loss > 0 %>
+              <td class="text-success"><%= number_to_currency(profit_loss) %></td>
+            <% elsif profit_loss < 0 %>
+              <td class="text-danger"><%= number_to_currency(profit_loss) %></td>
+            <% else %>
+              <td><%= number_to_currency(profit_loss) %></td>
+            <% end %>
+
+            <td>
+              <center>
+                <%= link_to "Edit", edit_stock_path(stock.id), class: "btn btn-secondary mr-1" %>
+                <%= link_to "Delete", stock_path(stock.id), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-danger mr-1" %>
+                <%= form_with(model: stock, url: stock_path(stock.id), method: :patch, local: true) do |form| %>
+                  <%= form.submit "Update", class: "btn btn-primary" %>
+                <% end %>
+              </center>
+            </td>
+
+
+
+          </tr>
+
         <% elsif @stock_info[:error].present? %>
           <p>Error: <%= @stock_info[:error] %></p>
         <% elsif @stock_info[:empty].present? %>
           <p><%= @stock_info[:empty] %></p>
         <% end %>
-        <%= render stock %>
       <% end %>
     <% end %>
   </tbody>

@@ -28,8 +28,21 @@ class StocksController < ApplicationController
 
     respond_to do |format|
       if @stock.save
-        format.html { redirect_to stock_url(@stock), notice: "Stock was successfully created." }
-        format.json { render :show, status: :created, location: @stock }
+        # Fetch the latest stock quote after saving the stock record
+        @stock_info = PolygonService.fetch_quote(@stock.ticker)
+
+        # Check if the stock quote was fetched successfully
+        if @stock_info[:price].present?
+          # Update the stock record with the fetched price
+          @stock.update(price: @stock_info[:price])
+          format.html { redirect_to stock_url(@stock), notice: "Stock was successfully created." }
+          format.json { render :show, status: :created, location: @stock }
+        else
+          # Handle the case where the stock quote could not be fetched
+          @stock.destroy
+          format.html { render :new, status: :unprocessable_entity, alert: "Failed to fetch stock quote." }
+          format.json { render json: { error: "Failed to fetch stock quote." }, status: :unprocessable_entity }
+        end
       else
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: @stock.errors, status: :unprocessable_entity }
@@ -37,18 +50,46 @@ class StocksController < ApplicationController
     end
   end
 
+
   # PATCH/PUT /stocks/1 or /stocks/1.json
+  # def update
+  #   respond_to do |format|
+  #     if @stock.update(stock_params)
+  #       format.html { redirect_to stock_url(@stock), notice: "Stock was successfully updated." }
+  #       format.json { render :show, status: :ok, location: @stock }
+
+  #     else
+  #       format.html { render :edit, status: :unprocessable_entity }
+  #       format.json { render json: @stock.errors, status: :unprocessable_entity }
+  #     end
+  #   end
+  # end
+
   def update
     respond_to do |format|
       if @stock.update(stock_params)
-        format.html { redirect_to stock_url(@stock), notice: "Stock was successfully updated." }
-        format.json { render :show, status: :ok, location: @stock }
+        # Fetch the latest stock quote after updating the stock record
+        @stock_info = PolygonService.fetch_quote(@stock.ticker)
+
+        # Check if the stock quote was fetched successfully
+        if @stock_info[:price].present?
+          # Update the stock record with the fetched price
+          @stock.update(price: @stock_info[:price])
+          format.html { redirect_to stock_url(@stock), notice: "Stock was successfully updated." }
+          format.json { render :show, status: :ok, location: @stock }
+        else
+          # Handle the case where the stock quote could not be fetched
+          format.html { render :edit, status: :unprocessable_entity, alert: "Failed to fetch updated stock quote." }
+          format.json { render json: { error: "Failed to fetch updated stock quote." }, status: :unprocessable_entity }
+        end
       else
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @stock.errors, status: :unprocessable_entity }
       end
     end
+
   end
+
 
   # DELETE /stocks/1 or /stocks/1.json
   def destroy
@@ -76,6 +117,6 @@ class StocksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def stock_params
-      params.require(:stock).permit(:ticker, :user_id, :name, :price)
+      params.require(:stock).permit(:ticker, :user_id, :name, :price, :share, :buy_price, :investment)
     end
 end

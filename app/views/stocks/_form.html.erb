@@ -5,6 +5,8 @@
 
   <div class="form-inputs">
     <%= f.input :ticker %>
+    <%= f.input :buy_price %>
+    <%= f.input :investment %>
     <%= f.input :user_id, input_html: { value: current_user.id, hidden: true }, label: false %>
   </div>
 

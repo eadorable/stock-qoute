@@ -39,3 +39,4 @@ end
 
 gem "devise", "~> 4.9"
 gem "jquery-rails"
+gem "font-awesome-sass"

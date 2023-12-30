@@ -1,7 +1,0 @@
-
-<tr>
-  <td><%= stock.name %></td>
-  <td><%= stock.ticker %></td>
-  <td><%= number_to_currency(stock.price) %></td>
-  <td><center><%= link_to "Edit", edit_stock_path(stock.id) %> <%= link_to "Delete", stock_path(stock.id), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %></center> </td> <!-- put edit link here -->
-</tr>
