@@ -3,12 +3,3 @@
     <%= form.text_field :ticker, placeholder: "Enter stock ticker" %>
     <%= form.submit 'Lookup' %>
 <% end %>
-
-<% if @empty %>
-  <%= @empty %>
-<% elsif @error %>
-  <%= @error %>
-<% else %>
-  <h2><%= "#{@stock_symbol}" %> <small>(<%=@stock_name  %>)</small></h2>
-  <p>$<%= @stock_price %></p>
-<% end %>

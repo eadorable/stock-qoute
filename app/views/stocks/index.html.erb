@@ -1,16 +1,28 @@
-<p style="color: green"></p>
-
 <h1>Stocks</h1>
-
-<div id="stocks">
-  <% @stocks.each do |stock| %>
-    <% if stock.user_id == current_user.id %>
-      <%= render stock %>
-      <p>
-        <%= link_to "Show this stock", stock %>
-      </p>
+<table class="table table-hover table-striped table-bordered">
+  <thead class="thead-dark">
+    <tr>
+      <th>Company</th>
+      <th>Ticker</th>
+      <th>Latest Price</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @stocks.each do |stock| %>
+      <% if stock.user_id == current_user.id %>
+        <% if stock.ticker.present? %>
+          <% @stock_info = PolygonService.fetch_quote(stock.ticker) %>
+          <% stock.name = @stock_info[:symbol] %>
+          <% stock.ticker = @stock_info[:symbol] %>
+          <% stock.price = @stock_info[:price] %>
+        <% elsif @stock_info[:error].present? %>
+          <p>Error: <%= @stock_info[:error] %></p>
+        <% elsif @stock_info[:empty].present? %>
+          <p><%= @stock_info[:empty] %></p>
+        <% end %>
+        <%= render stock %>
+      <% end %>
     <% end %>
-  <% end %>
-</div>
-
-<%= link_to "New stock", new_stock_path %>
+  </tbody>
+</table>

@@ -1,2 +1,11 @@
 <h1>This is about page!</h1>
 
+<%= form_with(url: home_about_path, method: :get) do |form| %>
+    <%= form.label :ticker, 'Stock Ticker:' %>
+    <%= form.text_field :ticker, placeholder: "Enter stock ticker" %>
+    <%= form.submit 'Lookup' %>
+<% end %>
+
+<% @stock_info = PolygonService.fetch_quote(params[:ticker]) %>
+<%= @stock_info[:symbol] %>
+<%= @stock_info[:price] %>

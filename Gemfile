@@ -15,7 +15,7 @@ gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 gem "bootsnap", require: false
 
 gem 'bootstrap', '~> 5.3', '>= 5.3.2'
-gem 'sassc-rails'
+gem 'sass-rails', '>= 6'
 
 gem 'dotenv-rails', groups: [:development, :test]
 gem 'simple_form'
@@ -39,4 +39,3 @@ end
 
 gem "devise", "~> 4.9"
 gem "jquery-rails"
-

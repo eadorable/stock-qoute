@@ -52,12 +52,16 @@ class StocksController < ApplicationController
 
   # DELETE /stocks/1 or /stocks/1.json
   def destroy
-    @stock.destroy
+    # @stock.destroy
 
-    respond_to do |format|
-      format.html { redirect_to stocks_url, notice: "Stock was successfully destroyed." }
-      format.json { head :no_content }
-    end
+    # respond_to do |format|
+    #   format.html { redirect_to stocks_url, notice: "Stock was successfully destroyed." }
+    #   format.json { head :no_content }
+    # end
+
+    @stock = Stock.find(params[:id])
+    @stock.destroy
+    redirect_to stocks_path
   end
 
   def correct_user
@@ -72,6 +76,6 @@ class StocksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def stock_params
-      params.require(:stock).permit(:ticker, :user_id)
+      params.require(:stock).permit(:ticker, :user_id, :name, :price)
     end
 end
