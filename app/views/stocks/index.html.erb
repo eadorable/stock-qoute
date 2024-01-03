@@ -35,9 +35,18 @@
               <td><%= stock.updated_at.strftime("%d/%m/%Y %H:%M") %></td>
               <td>
                 <center>
-                  <%= link_to "Edit", edit_stock_path(stock.id), class: "btn btn-outline-secondary" %>
-                  <%= link_to "Delete", stock_path(stock.id), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger" %>
-                  <%= link_to 'Update', update_price_stock_path(stock), data:{turbo_method: :patch, turbo_confirm: 'Are you sure?'} , class: "btn btn-outline-primary" %>
+
+                  <%= link_to(edit_stock_path(stock), class: "btn btn-outline-secondary") do %>
+                    <i class="fas fa-pen-to-square"></i>
+                  <% end %>
+
+                  <%= link_to(stock_path(stock), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger") do %>
+                    <i class="fas fa-trash-alt"></i>
+                  <% end %>
+
+                  <%= link_to(update_price_stock_path(stock), data:{turbo_method: :patch, turbo_confirm: 'Are you sure?'} , class: "btn btn-outline-primary") do %>
+                    <i class="fas fa-sync-alt"></i>
+                  <% end %>
                 </center>
               </td>
             </tr>
@@ -64,7 +73,7 @@
 
   <% if @stocks.count > 0 %>
     <!-- Display only when there's stock added-->
-    <div class="row mt-4">
+    <div class="row mt-4 border rounded">
       <div class="col-md-6 mb-4">
         <!-- Chart 1: Total -->
         <%= column_chart @chart_data_total, stacked: true, width: "100%", height: "200px" %>
