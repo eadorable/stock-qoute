@@ -9,76 +9,78 @@
       <th>Shares</th>
       <th>Value</th>
       <th>P/L</th>
-      <th>Updated_at</th>
+      <th>Price Date</th>
       <th>Action</th>
     </tr>
   </thead>
   <tbody>
-    <% total_cost = 0 %>
-    <% total_value = 0 %>
+
     <% @stocks.each do |stock| %>
-      <% if stock.user_id == current_user.id %>
-        <% if stock.ticker.present? %>
-          <% share = stock.investment/stock.buy_price %>
-          <% value = stock.price * share %>
-          <% profit_loss = value - stock.investment %>
-          <tr>
-            <td><%= stock.ticker.upcase %></td>
-            <td><%= number_to_currency(stock.price) %></td>
-            <td><%= number_to_currency(stock.buy_price) %></td>
-            <td><%= number_to_currency(stock.investment) %></td>
-            <td><%= number_to_human(share) %></td>
-            <td><%= number_to_currency(value) %></td>
-            <% if profit_loss > 0 %>
-              <td class="text-success"><%= number_to_currency(profit_loss) %></td>
-            <% elsif profit_loss < 0 %>
-              <td class="text-danger"><%= number_to_currency(profit_loss) %></td>
-            <% else %>
-              <td><%= number_to_currency(profit_loss) %></td>
-            <% end %>
-            <td><%= stock.updated_at.strftime("%d/%m/%Y %H:%M") %></td>
-            <td>
-              <center>
-                <%= link_to "Edit", edit_stock_path(stock.id), class: "btn btn-secondary mr-1" %>
-                <%= link_to "Delete", stock_path(stock.id), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-danger mr-1" %>
-                <%= form_with(model: stock, url: stock_path(stock.id), method: :patch, local: true) do |form| %>
-                  <%= form.submit "Update", class: "btn btn-primary" %>
-                <% end %>
-              </center>
-            </td>
-            <% total_cost += stock.investment %>
-            <% total_value += value %>
-          </tr>
 
-        <% elsif @stock_info[:error].present? %>
-          <p>Error: <%= @stock_info[:error] %></p>
-        <% elsif @stock_info[:empty].present? %>
-          <p><%= @stock_info[:empty] %></p>
-        <% end %>
+      <% if stock.ticker.present? %>
+        <tr>
+          <td><%= stock.ticker.upcase %></td>
+          <td><%= number_to_currency(stock.price) %></td>
+          <td><%= number_to_currency(stock.buy_price) %></td>
+          <td><%= number_to_currency(stock.investment) %></td>
+          <td><%= number_to_human(stock.share) %></td>
+          <td><%= number_to_currency(stock.value) %></td>
+          <% if stock.profit > 0 %>
+            <td class="text-success"><%= number_to_currency(stock.profit) %></td>
+          <% elsif stock.profit < 0 %>
+            <td class="text-danger"><%= number_to_currency(stock.profit) %></td>
+          <% else %>
+            <td><%= number_to_currency(stock.profit) %></td>
+          <% end %>
+          <td><%= stock.updated_at.strftime("%d/%m/%Y %H:%M") %></td>
+          <td>
+            <center>
+              <%= link_to "Edit", edit_stock_path(stock.id), class: "btn btn-secondary mr-1" %>
+              <%= link_to "Delete", stock_path(stock.id), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-danger mr-1" %>
+              <%= form_with(model: stock, url: stock_path(stock.id), method: :patch, local: true) do |form| %>
+                <%= form.submit "Update", class: "btn btn-primary" %>
+              <% end %>
+            </center>
+          </td>
+        </tr>
+
+      <% elsif @stock_info[:error].present? %>
+        <p>Error: <%= @stock_info[:error] %></p>
+      <% elsif @stock_info[:empty].present? %>
+        <p><%= @stock_info[:empty] %></p>
       <% end %>
+
+  <% end %>
+
+
+    <% if @stocks.count > 0 %> <!-- Display only when there's stock added-->
+      <!-- Total row -->
+      <tr>
+        <td colspan="3" ><strong>Total</strong></td>
+
+        <td><%= number_to_currency(@total_investment) %></td>
+        <td></td> <!-- If you don't have a 'Shares' column for total -->
+        <td><%= number_to_currency(@total_value) %></td>
+        <td colspan="3"></td> <!-- If you don't have a 'Profit/Loss' column for total -->
+
+      </tr>
     <% end %>
-
-        <!-- Total row -->
-    <tr>
-      <td colspan="3" ><strong>Total</strong></td>
-
-      <td><%= number_to_currency(total_cost) %></td>
-      <td></td> <!-- If you don't have a 'Shares' column for total -->
-      <td><%= number_to_currency(total_value) %></td>
-      <td colspan="3"></td> <!-- If you don't have a 'Profit/Loss' column for total -->
-
-    </tr>
-
-    <% chart_data = {
-      "TotalCost" => @stocks.sum(:investment),
-      "CurrentValue" => @stocks.sum("price * (investment / buy_price)")
-    } %>
-
 
   </tbody>
 </table>
-<center>
-  <div>
-    <%= column_chart chart_data, stacked: true, width: "200px", height: "200px" %>
+
+<% if @stocks.count > 0 %>
+  <!-- Display only when there's stock added-->
+  <div class="container mt-4">
+    <div class="d-flex justify-content-center align-items-center">
+      <div style="width: 50%;" class="border rounded ms-2">
+        <!-- Chart 1: Total -->
+        <%= column_chart @chart_data_total, stacked: true, width: "100%", height: "200px" %>
+      </div>
+      <div style="width: 50%;" class="border rounded ms-2">
+        <!-- Chart 2: Each Stock -->
+        <%= pie_chart @chart_data_each_stock, width: "100%", height: '200px', library: { title: 'Stock Values' } %>
+      </div>
+    </div>
   </div>
-</center>
+<% end %>

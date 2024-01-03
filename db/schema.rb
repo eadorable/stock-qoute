@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_01_03_121705) do
+ActiveRecord::Schema[7.0].define(version: 2024_01_03_142458) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -23,6 +23,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_03_121705) do
     t.float "price"
     t.float "buy_price"
     t.float "investment"
+    t.float "share"
+    t.float "value"
+    t.float "profit"
     t.index ["user_id"], name: "index_stocks_on_user_id"
   end
 

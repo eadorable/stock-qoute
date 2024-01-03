@@ -6,7 +6,33 @@ class StocksController < ApplicationController
 
   # GET /stocks or /stocks.json
   def index
-    @stocks = Stock.all
+    # fetch the stock for the current user
+    @stocks = current_user.stocks
+
+    # fetch the total investment and total value for the current user
+    total_investment = 0
+    total_value = 0
+    @stocks.each do |stock|
+      total_investment += stock.investment
+      total_value += stock.price * (stock.investment / stock.buy_price)
+    end
+    # set the instance variables
+    @total_investment = total_investment
+    @total_value = total_value
+
+    # chart data
+    @chart_data_total = {
+      "Total_Cost" => total_investment,
+      "Current_Value" => total_value,
+    }
+
+    @chart_data_each_stock = {}
+      @stocks.each do |stock|
+        @chart_data_each_stock[stock.ticker] = stock.value
+        
+      end
+
+
   end
 
   # GET /stocks/1 or /stocks/1.json
@@ -33,10 +59,14 @@ class StocksController < ApplicationController
 
         # Check if the stock quote was fetched successfully
         if @stock_info[:price].present?
+          # Convert the API date
           date_seconds= @stock_info[:date]/1000
           api_date = DateTime.strptime(date_seconds.to_s, '%s')
+          share = @stock.investment / @stock.buy_price
+          value = @stock_info[:price] * share
+          profit = value - @stock.investment
           # Update the stock record with the fetched price
-          @stock.update(price: @stock_info[:price], updated_at: api_date)
+          @stock.update(price: @stock_info[:price], updated_at: api_date, share: share, value: value, profit: profit)
           format.html { redirect_to stock_url(@stock), notice: "Stock was successfully created." }
           format.json { render :show, status: :created, location: @stock }
         else
@@ -53,20 +83,6 @@ class StocksController < ApplicationController
   end
 
 
-  # PATCH/PUT /stocks/1 or /stocks/1.json
-  # def update
-  #   respond_to do |format|
-  #     if @stock.update(stock_params)
-  #       format.html { redirect_to stock_url(@stock), notice: "Stock was successfully updated." }
-  #       format.json { render :show, status: :ok, location: @stock }
-
-  #     else
-  #       format.html { render :edit, status: :unprocessable_entity }
-  #       format.json { render json: @stock.errors, status: :unprocessable_entity }
-  #     end
-  #   end
-  # end
-
   def update
     respond_to do |format|
       if @stock.update(stock_params)
@@ -78,8 +94,11 @@ class StocksController < ApplicationController
           # Convert the API date
           date_seconds= @stock_info[:date]/1000
           api_date = DateTime.strptime(date_seconds.to_s, '%s')
+          share = @stock.investment / @stock.buy_price
+          value = @stock_info[:price] * share
+          profit = value - @stock.investment
           # Update the stock record with the fetched price
-          @stock.update(price: @stock_info[:price], updated_at: api_date)
+          @stock.update(price: @stock_info[:price], updated_at: api_date, share: share, value: value, profit: profit)
           format.html { redirect_to stock_url(@stock), notice: "Stock was successfully updated." }
           format.json { render :show, status: :ok, location: @stock }
         else
@@ -122,6 +141,6 @@ class StocksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def stock_params
-      params.require(:stock).permit(:ticker, :user_id, :name, :price, :share, :buy_price, :investment, :updated_at)
+      params.require(:stock).permit(:ticker, :user_id, :name, :price, :share, :buy_price, :investment, :updated_at, :value)
     end
 end
