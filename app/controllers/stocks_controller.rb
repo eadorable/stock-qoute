@@ -27,10 +27,19 @@ class StocksController < ApplicationController
     }
 
     @chart_data_each_stock = {}
-      @stocks.each do |stock|
-        @chart_data_each_stock[stock.ticker] = stock.value
-        
-      end
+    total_investment = 0
+
+    @stocks.each do |stock|
+      total_investment += stock.investment
+    end
+
+    @stocks.each do |stock|
+      percentage = total_investment.zero? ? 0 : (stock.investment / total_investment) * 100
+      formatted_percentage = ActionController::Base.helpers.number_to_percentage(percentage, precision: 0)
+      @chart_data_each_stock[stock.ticker] = formatted_percentage
+    end
+
+
 
 
   end
@@ -97,7 +106,7 @@ class StocksController < ApplicationController
           share = @stock.investment / @stock.buy_price
           value = @stock_info[:price] * share
           profit = value - @stock.investment
-          # Update the stock record with the fetched price
+          # Update the stock record
           @stock.update(price: @stock_info[:price], updated_at: api_date, share: share, value: value, profit: profit)
           format.html { redirect_to stock_url(@stock), notice: "Stock was successfully updated." }
           format.json { render :show, status: :ok, location: @stock }
@@ -114,16 +123,26 @@ class StocksController < ApplicationController
 
   end
 
+  def update_price
+    # Fetch the latest stock quote after updating the stock record
+    @stock = Stock.find(params[:id])
+    @stock_info = PolygonService.fetch_quote(@stock.ticker)
+  # Check if the stock quote was fetched successfully
+    if @stock_info[:price].present?
+      # Update the stock and date record with the fetched price
+      date_seconds= @stock_info[:date]/1000
+      api_date = DateTime.strptime(date_seconds.to_s, '%s')
+      @stock.update(price: @stock_info[:price], updated_at: api_date)
+      redirect_to stocks_path, notice: 'Stock price was successfully updated.'
+    else
+      # Handle the case where the stock quote could not be fetched
+      redirect_to stocks_path, alert: 'Failed to fetch stock quote for price update.'
+    end
+
+  end
 
   # DELETE /stocks/1 or /stocks/1.json
   def destroy
-    # @stock.destroy
-
-    # respond_to do |format|
-    #   format.html { redirect_to stocks_url, notice: "Stock was successfully destroyed." }
-    #   format.json { head :no_content }
-    # end
-
     @stock = Stock.find(params[:id])
     @stock.destroy
     redirect_to stocks_path

@@ -1,86 +1,78 @@
-<h1>Portfolio</h1>
-<table class="table table-hover table-striped table-bordered">
-  <thead class="thead-dark">
-    <tr>
-      <th>Ticker</th>
-      <th>Last Price</th>
-      <th>Buy Price</th>
-      <th>Cost</th>
-      <th>Shares</th>
-      <th>Value</th>
-      <th>P/L</th>
-      <th>Price Date</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody>
-
-    <% @stocks.each do |stock| %>
-
-      <% if stock.ticker.present? %>
+<h1 class="mt-4">Portfolio</h1>
+<div class="container mt-4">
+  <div class="table-responsive">
+    <table class="table table-hover table-striped table-bordered">
+      <thead class="thead-dark">
         <tr>
-          <td><%= stock.ticker.upcase %></td>
-          <td><%= number_to_currency(stock.price) %></td>
-          <td><%= number_to_currency(stock.buy_price) %></td>
-          <td><%= number_to_currency(stock.investment) %></td>
-          <td><%= number_to_human(stock.share) %></td>
-          <td><%= number_to_currency(stock.value) %></td>
-          <% if stock.profit > 0 %>
-            <td class="text-success"><%= number_to_currency(stock.profit) %></td>
-          <% elsif stock.profit < 0 %>
-            <td class="text-danger"><%= number_to_currency(stock.profit) %></td>
-          <% else %>
-            <td><%= number_to_currency(stock.profit) %></td>
-          <% end %>
-          <td><%= stock.updated_at.strftime("%d/%m/%Y %H:%M") %></td>
-          <td>
-            <center>
-              <%= link_to "Edit", edit_stock_path(stock.id), class: "btn btn-secondary mr-1" %>
-              <%= link_to "Delete", stock_path(stock.id), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-danger mr-1" %>
-              <%= form_with(model: stock, url: stock_path(stock.id), method: :patch, local: true) do |form| %>
-                <%= form.submit "Update", class: "btn btn-primary" %>
-              <% end %>
-            </center>
-          </td>
+          <th>Ticker</th>
+          <th>Last Price</th>
+          <th>Buy Price</th>
+          <th>Cost</th>
+          <th>Shares</th>
+          <th>Value</th>
+          <th>P/L</th>
+          <th>Price Date</th>
+          <th>Action</th>
         </tr>
+      </thead>
+      <tbody>
+        <% @stocks.each do |stock| %>
+          <% if stock.ticker.present? %>
+            <tr>
+              <td><%= stock.ticker.upcase %></td>
+              <td><%= number_to_currency(stock.price) %></td>
+              <td><%= number_to_currency(stock.buy_price) %></td>
+              <td><%= number_to_currency(stock.investment) %></td>
+              <td><%= number_to_human(stock.share) %></td>
+              <td><%= number_to_currency(stock.value) %></td>
+              <% if stock.profit > 0 %>
+                <td class="text-success"><%= number_to_currency(stock.profit) %></td>
+              <% elsif stock.profit < 0 %>
+                <td class="text-danger"><%= number_to_currency(stock.profit) %></td>
+              <% else %>
+                <td><%= number_to_currency(stock.profit) %></td>
+              <% end %>
+              <td><%= stock.updated_at.strftime("%d/%m/%Y %H:%M") %></td>
+              <td>
+                <center>
+                  <%= link_to "Edit", edit_stock_path(stock.id), class: "btn btn-outline-secondary" %>
+                  <%= link_to "Delete", stock_path(stock.id), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger" %>
+                  <%= link_to 'Update', update_price_stock_path(stock), data:{turbo_method: :patch, turbo_confirm: 'Are you sure?'} , class: "btn btn-outline-primary" %>
+                </center>
+              </td>
+            </tr>
+          <% elsif @stock_info[:error].present? %>
+            <p>Error: <%= @stock_info[:error] %></p>
+          <% elsif @stock_info[:empty].present? %>
+            <p><%= @stock_info[:empty] %></p>
+          <% end %>
+        <% end %>
 
-      <% elsif @stock_info[:error].present? %>
-        <p>Error: <%= @stock_info[:error] %></p>
-      <% elsif @stock_info[:empty].present? %>
-        <p><%= @stock_info[:empty] %></p>
-      <% end %>
+        <% if @stocks.count > 0 %>
+          <!-- Total row -->
+          <tr>
+            <td colspan="3"><strong>Total</strong></td>
+            <td><%= number_to_currency(@total_investment) %></td>
+            <td></td> <!-- If you don't have a 'Shares' column for total -->
+            <td><%= number_to_currency(@total_value) %></td>
+            <td colspan="3"></td> <!-- If you don't have a 'Profit/Loss' column for total -->
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 
-  <% end %>
-
-
-    <% if @stocks.count > 0 %> <!-- Display only when there's stock added-->
-      <!-- Total row -->
-      <tr>
-        <td colspan="3" ><strong>Total</strong></td>
-
-        <td><%= number_to_currency(@total_investment) %></td>
-        <td></td> <!-- If you don't have a 'Shares' column for total -->
-        <td><%= number_to_currency(@total_value) %></td>
-        <td colspan="3"></td> <!-- If you don't have a 'Profit/Loss' column for total -->
-
-      </tr>
-    <% end %>
-
-  </tbody>
-</table>
-
-<% if @stocks.count > 0 %>
-  <!-- Display only when there's stock added-->
-  <div class="container mt-4">
-    <div class="d-flex justify-content-center align-items-center">
-      <div style="width: 50%;" class="border rounded ms-2">
+  <% if @stocks.count > 0 %>
+    <!-- Display only when there's stock added-->
+    <div class="row mt-4">
+      <div class="col-md-6 mb-4">
         <!-- Chart 1: Total -->
         <%= column_chart @chart_data_total, stacked: true, width: "100%", height: "200px" %>
       </div>
-      <div style="width: 50%;" class="border rounded ms-2">
+      <div class="col-md-6">
         <!-- Chart 2: Each Stock -->
         <%= pie_chart @chart_data_each_stock, width: "100%", height: '200px', library: { title: 'Stock Values' } %>
       </div>
     </div>
-  </div>
-<% end %>
+  <% end %>
+</div>
