@@ -43,7 +43,8 @@ class PolygonService
         else
           return {
             symbol: parsed_response["ticker"],
-            price: parsed_response["results"][0]["c"]
+            price: parsed_response["results"][0]["c"],
+            date: parsed_response["results"][0]["t"]
           }
         end
       rescue OpenURI::HTTPError => e

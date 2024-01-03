@@ -40,3 +40,7 @@ end
 gem "devise", "~> 4.9"
 gem "jquery-rails"
 gem "font-awesome-sass"
+
+gem "chartkick", "~> 5.0"
+
+gem "groupdate", "~> 6.4"

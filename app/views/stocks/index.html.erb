@@ -9,10 +9,13 @@
       <th>Shares</th>
       <th>Value</th>
       <th>P/L</th>
+      <th>Updated_at</th>
       <th>Action</th>
     </tr>
   </thead>
   <tbody>
+    <% total_cost = 0 %>
+    <% total_value = 0 %>
     <% @stocks.each do |stock| %>
       <% if stock.user_id == current_user.id %>
         <% if stock.ticker.present? %>
@@ -33,7 +36,7 @@
             <% else %>
               <td><%= number_to_currency(profit_loss) %></td>
             <% end %>
-
+            <td><%= stock.updated_at.strftime("%d/%m/%Y %H:%M") %></td>
             <td>
               <center>
                 <%= link_to "Edit", edit_stock_path(stock.id), class: "btn btn-secondary mr-1" %>
@@ -43,9 +46,8 @@
                 <% end %>
               </center>
             </td>
-
-
-
+            <% total_cost += stock.investment %>
+            <% total_value += value %>
           </tr>
 
         <% elsif @stock_info[:error].present? %>
@@ -55,5 +57,28 @@
         <% end %>
       <% end %>
     <% end %>
+
+        <!-- Total row -->
+    <tr>
+      <td colspan="3" ><strong>Total</strong></td>
+
+      <td><%= number_to_currency(total_cost) %></td>
+      <td></td> <!-- If you don't have a 'Shares' column for total -->
+      <td><%= number_to_currency(total_value) %></td>
+      <td colspan="3"></td> <!-- If you don't have a 'Profit/Loss' column for total -->
+
+    </tr>
+
+    <% chart_data = {
+      "TotalCost" => @stocks.sum(:investment),
+      "CurrentValue" => @stocks.sum("price * (investment / buy_price)")
+    } %>
+
+
   </tbody>
 </table>
+<center>
+  <div>
+    <%= column_chart chart_data, stacked: true, width: "200px", height: "200px" %>
+  </div>
+</center>

@@ -33,8 +33,10 @@ class StocksController < ApplicationController
 
         # Check if the stock quote was fetched successfully
         if @stock_info[:price].present?
+          date_seconds= @stock_info[:date]/1000
+          api_date = DateTime.strptime(date_seconds.to_s, '%s')
           # Update the stock record with the fetched price
-          @stock.update(price: @stock_info[:price])
+          @stock.update(price: @stock_info[:price], updated_at: api_date)
           format.html { redirect_to stock_url(@stock), notice: "Stock was successfully created." }
           format.json { render :show, status: :created, location: @stock }
         else
@@ -73,8 +75,11 @@ class StocksController < ApplicationController
 
         # Check if the stock quote was fetched successfully
         if @stock_info[:price].present?
+          # Convert the API date
+          date_seconds= @stock_info[:date]/1000
+          api_date = DateTime.strptime(date_seconds.to_s, '%s')
           # Update the stock record with the fetched price
-          @stock.update(price: @stock_info[:price])
+          @stock.update(price: @stock_info[:price], updated_at: api_date)
           format.html { redirect_to stock_url(@stock), notice: "Stock was successfully updated." }
           format.json { render :show, status: :ok, location: @stock }
         else
@@ -117,6 +122,6 @@ class StocksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def stock_params
-      params.require(:stock).permit(:ticker, :user_id, :name, :price, :share, :buy_price, :investment)
+      params.require(:stock).permit(:ticker, :user_id, :name, :price, :share, :buy_price, :investment, :updated_at)
     end
 end
