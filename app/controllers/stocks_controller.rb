@@ -3,6 +3,8 @@ class StocksController < ApplicationController
   before_action :correct_user, only: [:edit, :update, :destroy]
   before_action :authenticate_user!
 
+  require 'open-uri'
+  require 'json'
 
   # GET /stocks or /stocks.json
   def index
@@ -46,6 +48,24 @@ class StocksController < ApplicationController
 
   # GET /stocks/1 or /stocks/1.json
   def show
+    @stock = Stock.find(params[:id])
+    ticker = @stock.ticker
+    limit = 300
+    api_key = ENV['POLYGON_API_KEY']
+
+    url = "https://api.polygon.io/v1/indicators/ema/#{ticker}?timespan=day&adjusted=true&window=50&series_type=close&order=desc&limit=#{limit}&apiKey=#{api_key}"
+    response = URI.open(url).read
+    data = JSON.parse(response)
+    values = data["results"]["values"]
+
+    @timestamp = values.map do |value|
+      Time.at(value["timestamp"]/1000).strftime("%Y-%m-%d")
+    end
+
+    @value = values.map do |value|
+      value["value"].round(2)
+    end
+
   end
 
   # GET /stocks/new

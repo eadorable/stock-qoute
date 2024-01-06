@@ -1,4 +1,5 @@
-<p style="color: green"></p>
 
-<%= render @stock %>
+<!-- app/views/stocks/show.html.erb -->
+<%= line_chart @timestamp.zip(@value).to_h, height: '500px', xtitle: 'Date', ytitle: 'Price', library: { hAxis: { title: 'Date' }, vAxis: { title: 'Price' } } %>
+<br>
 

@@ -19,7 +19,7 @@
         <% @stocks.each do |stock| %>
           <% if stock.ticker.present? %>
             <tr>
-              <td><%= stock.ticker.upcase %></td>
+              <td><%= link_to stock.ticker.upcase, stock_path(stock) %></td>
               <td><%= number_to_currency(stock.price) %></td>
               <td><%= number_to_currency(stock.buy_price) %></td>
               <td><%= number_to_currency(stock.investment) %></td>
