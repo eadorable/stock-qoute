@@ -1,0 +1,15 @@
+
+  .form-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .inline-form-element {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .btn-primary {
+    margin-top: 25px; /* Adjust this margin as needed */
+  }

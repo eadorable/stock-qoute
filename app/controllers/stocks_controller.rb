@@ -50,10 +50,11 @@ class StocksController < ApplicationController
   def show
     @stock = Stock.find(params[:id])
     ticker = @stock.ticker
-    limit = 365 # max 5000, default 10
-    timespan = "day" # day, week, month, quarter, year
-    window = 50 # could be 10, 20, 50, 100, 200 ema
     api_key = ENV['POLYGON_API_KEY']
+
+    limit = params[:limit] || 10 # max 5000, default 10
+    timespan = params[:timespan] || 'day' # day, week, month, quarter, year
+    window = params[:window] || 50 # could be 10, 20, 50, 100, 200 ema
 
     url = "https://api.polygon.io/v1/indicators/ema/#{ticker}?timespan=#{timespan}&adjusted=true&window=#{window}&series_type=close&order=desc&limit=#{limit}&apiKey=#{api_key}"
     response = URI.open(url).read
