@@ -50,10 +50,12 @@ class StocksController < ApplicationController
   def show
     @stock = Stock.find(params[:id])
     ticker = @stock.ticker
-    limit = 300
+    limit = 365 # max 5000, default 10
+    timespan = "day" # day, week, month, quarter, year
+    window = 50 # could be 10, 20, 50, 100, 200 ema
     api_key = ENV['POLYGON_API_KEY']
 
-    url = "https://api.polygon.io/v1/indicators/ema/#{ticker}?timespan=day&adjusted=true&window=50&series_type=close&order=desc&limit=#{limit}&apiKey=#{api_key}"
+    url = "https://api.polygon.io/v1/indicators/ema/#{ticker}?timespan=#{timespan}&adjusted=true&window=#{window}&series_type=close&order=desc&limit=#{limit}&apiKey=#{api_key}"
     response = URI.open(url).read
     data = JSON.parse(response)
     values = data["results"]["values"]
@@ -80,11 +82,13 @@ class StocksController < ApplicationController
   # POST /stocks or /stocks.json
   def create
     @stock = Stock.new(stock_params)
+    @stock.user_id = current_user.id
 
     respond_to do |format|
       if @stock.save
         # Fetch the latest stock quote after saving the stock record
         @stock_info = PolygonService.fetch_quote(@stock.ticker)
+
 
         # Check if the stock quote was fetched successfully
         if @stock_info[:price].present?
@@ -180,6 +184,6 @@ class StocksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def stock_params
-      params.require(:stock).permit(:ticker, :user_id, :name, :price, :share, :buy_price, :investment, :updated_at, :value)
+      params.require(:stock).permit(:ticker, :name, :price, :share, :buy_price, :investment, :updated_at, :value, :user_id)
     end
 end

@@ -5,6 +5,7 @@ class Stock < ApplicationRecord
                      format: { without: /\s|\W|\d|\.\,;\:!?\(\)\[\]/ }
 
   validates :buy_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :investment, presence: true, numericality: { greater_than: 0 }
+  validates :investment, presence: true, numericality: { greater_than: :buy_price }
 
 end
+

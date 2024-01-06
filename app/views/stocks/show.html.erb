@@ -1,5 +1,3 @@
-
-<!-- app/views/stocks/show.html.erb -->
+<h1><%= @stock.ticker %></h1>
 <%= line_chart @timestamp.zip(@value).to_h, height: '500px', xtitle: 'Date', ytitle: 'Price', library: { hAxis: { title: 'Date' }, vAxis: { title: 'Price' } } %>
 <br>
-
