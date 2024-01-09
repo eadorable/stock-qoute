@@ -1,15 +1,34 @@
 
-  .form-inputs {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+.chart-and-form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .inline-form-element {
-    display: flex;
-    flex-direction: column;
-  }
+.form-container {
+  width: 100%;
+  max-width: 600px; /* Adjust the max-width as needed */
+}
 
-  .btn-primary {
-    margin-top: 25px; /* Adjust this margin as needed */
-  }
+.form-inputs {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.inline-form-element {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.btn-primary {
+  margin-top: 25px; /* Adjust this margin as needed */
+}
+
+#logo {
+  width: 150px;
+  height: 50px;
+
+}

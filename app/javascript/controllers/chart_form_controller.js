@@ -1,29 +1,28 @@
-import { Controller } from "@hotwired/stimulus"
-
 // Connects to data-controller="chart-form"
-// export default class extends Controller {
-//   connect() {
-
-//     console.log("Chart form controller connected")
-//   }
-// }
+// Connects to data-action="chart-form#updateChart"
+// not use for now due to conflict with form_with method: :get
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ["timespan", "window", "limit"];
+  static targets = ["timespan", "window", "limit", "title"];
 
-  async updateChart() {
-    const timespan = this.timespanTarget.value;
-    const window = this.windowTarget.value;
-    const limit = this.limitTarget.value;
+  // async updateChart(event) {
+  //   event.preventDefault();
 
-    const url = new URL(window.location.href);
-    url.searchParams.set("timespan", timespan);
-    url.searchParams.set("window", window);
-    url.searchParams.set("limit", limit);
+  //   this.titleTarget.innerHTML = "";
 
-    const response = await fetch(url);
-    const html = await response.text();
+  //   const timespan = this.timespanTarget.value;
+  //   const window = this.windowTarget.value;
+  //   const limit = this.limitTarget.value;
 
-    document.getElementById('chart-container').innerHTML = html;
+  //   const chartTitle = `<h2>Timespan: ${timespan}, Window: ${window}, Limit: ${limit}</h2>`;
+
+
+  //   this.titleTarget.insertAdjacentHTML("afterbegin", chartTitle);
+
+  // }
+
+  preventChartDefault(event) {
+    event.preventDefault();
   }
 }

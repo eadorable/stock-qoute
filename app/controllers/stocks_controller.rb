@@ -42,8 +42,6 @@ class StocksController < ApplicationController
     end
 
 
-
-
   end
 
   # GET /stocks/1 or /stocks/1.json
@@ -52,21 +50,26 @@ class StocksController < ApplicationController
     ticker = @stock.ticker
     api_key = ENV['POLYGON_API_KEY']
 
-    limit = params[:limit] || 10 # max 5000, default 10
-    timespan = params[:timespan] || 'day' # day, week, month, quarter, year
-    window = params[:window] || 50 # could be 10, 20, 50, 100, 200 ema
+    limit = 366 # max 5000, default 10
+    @timespan = params[:timespan] || 'day' # day, week, month, quarter, year
+    @window = params[:window] || 50 # could be 10, 20, 50, 100, 200 ema
 
-    url = "https://api.polygon.io/v1/indicators/ema/#{ticker}?timespan=#{timespan}&adjusted=true&window=#{window}&series_type=close&order=desc&limit=#{limit}&apiKey=#{api_key}"
+    url = "https://api.polygon.io/v1/indicators/ema/#{ticker}?timespan=day&adjusted=true&window=#{@window}&series_type=close&order=desc&limit=#{limit}&apiKey=#{api_key}"
     response = URI.open(url).read
     data = JSON.parse(response)
     values = data["results"]["values"]
 
-    @timestamp = values.map do |value|
-      Time.at(value["timestamp"]/1000).strftime("%Y-%m-%d")
-    end
+    if values.present?
+      @timestamp = values.map do |value|
+        Time.at(value["timestamp"]/1000).strftime("%Y-%m-%d")
+      end
 
-    @value = values.map do |value|
-      value["value"].round(2)
+      @value = values.map do |value|
+        value["value"].round(2)
+      end
+    else
+      @timestamp = []
+      @value = []
     end
 
   end
@@ -87,9 +90,16 @@ class StocksController < ApplicationController
 
     respond_to do |format|
       if @stock.save
+        api_key = ENV['POLYGON_API_KEY']
+        # Fetch the ticker name and logo
+        url = "https://api.polygon.io/v3/reference/tickers/#{@stock.ticker.upcase}?apiKey=#{api_key}"
+        response = URI.open(url).read
+        ticker_data = JSON.parse(response)
+        @ticker_name = ticker_data["results"]["name"]
+        @ticker_logo = ticker_data["results"]["branding"]["logo_url"]+"?""apikey=#{api_key}"
+
         # Fetch the latest stock quote after saving the stock record
         @stock_info = PolygonService.fetch_quote(@stock.ticker)
-
 
         # Check if the stock quote was fetched successfully
         if @stock_info[:price].present?
@@ -100,8 +110,8 @@ class StocksController < ApplicationController
           value = @stock_info[:price] * share
           profit = value - @stock.investment
           # Update the stock record with the fetched price
-          @stock.update(price: @stock_info[:price], updated_at: api_date, share: share, value: value, profit: profit)
-          format.html { redirect_to stock_url(@stock), notice: "Stock was successfully created." }
+          @stock.update(price: @stock_info[:price], updated_at: api_date, share: share, value: value, profit: profit, name: @ticker_name, logo: @ticker_logo)
+          format.html { redirect_to stocks_url, notice: "Stock was successfully created." }
           format.json { render :show, status: :created, location: @stock }
         else
           # Handle the case where the stock quote could not be fetched
@@ -120,6 +130,13 @@ class StocksController < ApplicationController
   def update
     respond_to do |format|
       if @stock.update(stock_params)
+        api_key = ENV['POLYGON_API_KEY']
+        # Fetch the ticker name and logo
+        url = "https://api.polygon.io/v3/reference/tickers/#{@stock.ticker.upcase}?apiKey=#{api_key}"
+        response = URI.open(url).read
+        ticker_data = JSON.parse(response)
+        @ticker_name = ticker_data["results"]["name"]
+        @ticker_logo = ticker_data["results"]["branding"]["logo_url"]+"?""apikey=#{api_key}"
         # Fetch the latest stock quote after updating the stock record
         @stock_info = PolygonService.fetch_quote(@stock.ticker)
 
@@ -132,8 +149,8 @@ class StocksController < ApplicationController
           value = @stock_info[:price] * share
           profit = value - @stock.investment
           # Update the stock record
-          @stock.update(price: @stock_info[:price], updated_at: api_date, share: share, value: value, profit: profit)
-          format.html { redirect_to stock_url(@stock), notice: "Stock was successfully updated." }
+          @stock.update(price: @stock_info[:price], updated_at: api_date, share: share, value: value, profit: profit, name: @ticker_name, logo: @ticker_logo)
+          format.html { redirect_to stocks_url, notice: "Stock was successfully updated." }
           format.json { render :show, status: :ok, location: @stock }
         else
           # Handle the case where the stock quote could not be fetched
@@ -185,6 +202,6 @@ class StocksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def stock_params
-      params.require(:stock).permit(:ticker, :name, :price, :share, :buy_price, :investment, :updated_at, :value, :user_id)
+      params.require(:stock).permit(:ticker, :name, :price, :share, :buy_price, :investment, :updated_at, :value, :user_id, :logo)
     end
 end

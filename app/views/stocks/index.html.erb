@@ -4,6 +4,7 @@
     <table class="table table-hover table-striped table-bordered">
       <thead class="thead-dark">
         <tr>
+          <th>Company</th>
           <th>Ticker</th>
           <th>Last Price</th>
           <th>Buy Price</th>
@@ -18,38 +19,46 @@
       <tbody>
         <% @stocks.each do |stock| %>
           <% if stock.ticker.present? %>
-            <tr>
-              <td><%= link_to stock.ticker.upcase, stock_path(stock) %></td>
-              <td><%= number_to_currency(stock.price) %></td>
-              <td><%= number_to_currency(stock.buy_price) %></td>
-              <td><%= number_to_currency(stock.investment) %></td>
-              <td><%= number_to_human(stock.share) %></td>
-              <td><%= number_to_currency(stock.value) %></td>
-              <% if stock.profit > 0 %>
-                <td class="text-success"><%= number_to_currency(stock.profit) %></td>
-              <% elsif stock.profit < 0 %>
-                <td class="text-danger"><%= number_to_currency(stock.profit) %></td>
-              <% else %>
-                <td><%= number_to_currency(stock.profit) %></td>
-              <% end %>
-              <td><%= stock.updated_at.strftime("%d/%m/%Y %H:%M") %></td>
-              <td>
-                <center>
+            <% if stock.price.present? %>
+              <tr>
+                <td><%= stock.name %></td>
+                <td><%= link_to stock.ticker.upcase, stock_path(stock) %></td>
+                <td><%= number_to_currency(stock.price) %></td>
+                <td><%= number_to_currency(stock.buy_price) %></td>
+                <td><%= number_to_currency(stock.investment) %></td>
+                <td><%= number_to_human(stock.share) %></td>
+                <td><%= number_to_currency(stock.value) %></td>
+                <% if stock.profit > 0 %>
+                  <td class="text-success"><%= number_to_currency(stock.profit) %></td>
+                <% elsif stock.profit < 0 %>
+                  <td class="text-danger"><%= number_to_currency(stock.profit) %></td>
+                <% else %>
+                  <td><%= number_to_currency(stock.profit) %></td>
+                <% end %>
+                <td><%= stock.updated_at.strftime("%d/%m/%Y %H:%M") %></td>
+                <td>
+                  <center>
 
-                  <%= link_to(edit_stock_path(stock), class: "btn btn-outline-secondary") do %>
-                    <i class="fas fa-pen-to-square"></i>
-                  <% end %>
+                    <%= link_to(edit_stock_path(stock), class: "btn btn-outline-secondary") do %>
+                      <i class="fas fa-pen-to-square"></i>
+                    <% end %>
 
-                  <%= link_to(stock_path(stock), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger") do %>
-                    <i class="fas fa-trash-alt"></i>
-                  <% end %>
+                    <%= link_to(stock_path(stock), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger") do %>
+                      <i class="fas fa-trash-alt"></i>
+                    <% end %>
 
-                  <%= link_to(update_price_stock_path(stock), data:{turbo_method: :patch, turbo_confirm: 'Are you sure?'} , class: "btn btn-outline-primary") do %>
-                    <i class="fas fa-sync-alt"></i>
-                  <% end %>
-                </center>
-              </td>
-            </tr>
+                    <%= link_to(update_price_stock_path(stock), data:{turbo_method: :patch, turbo_confirm: 'Are you sure?'} , class: "btn btn-outline-primary") do %>
+                      <i class="fas fa-sync-alt"></i>
+                    <% end %>
+                  </center>
+                </td>
+              </tr>
+            <% else %>
+              <p>Invalid ticker!<%= link_to(edit_stock_path(stock), class: "btn btn-outline-secondary") do %>
+                                <i class="fas fa-pen-to-square"></i>
+                                <% end %>
+              </p>
+            <% end %>
           <% elsif @stock_info[:error].present? %>
             <p>Error: <%= @stock_info[:error] %></p>
           <% elsif @stock_info[:empty].present? %>
@@ -60,11 +69,11 @@
         <% if @stocks.count > 0 %>
           <!-- Total row -->
           <tr>
-            <td colspan="3"><strong>Total</strong></td>
+            <td colspan="4"><strong>Total</strong></td>
             <td><%= number_to_currency(@total_investment) %></td>
             <td></td> <!-- If you don't have a 'Shares' column for total -->
             <td><%= number_to_currency(@total_value) %></td>
-            <td colspan="3"></td> <!-- If you don't have a 'Profit/Loss' column for total -->
+            <td colspan="4"></td> <!-- If you don't have a 'Profit/Loss' column for total -->
           </tr>
         <% end %>
       </tbody>
