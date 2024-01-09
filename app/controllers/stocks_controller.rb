@@ -96,7 +96,12 @@ class StocksController < ApplicationController
         response = URI.open(url).read
         ticker_data = JSON.parse(response)
         @ticker_name = ticker_data["results"]["name"]
-        @ticker_logo = ticker_data["results"]["branding"]["logo_url"]+"?""apikey=#{api_key}"
+
+        if @ticker_logo.present?
+          @ticker_logo = ticker_data["results"]["branding"]["logo_url"]+"?""apikey=#{api_key}"
+        else
+          @ticker_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/No_Image_Available.jpg/480px-No_Image_Available.jpg"
+        end
 
         # Fetch the latest stock quote after saving the stock record
         @stock_info = PolygonService.fetch_quote(@stock.ticker)

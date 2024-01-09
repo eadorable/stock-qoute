@@ -1,14 +1,10 @@
 <div data-controller="chart-form">
-
-
+  
   <div class="header-container">
+    <small><%= @stock.name %></small>
+    <hr>
     <h1 class="m-0">
-      <span>
-        <img id="logo" src="<%= @stock.logo %>" alt="<%= @stock.name + ' logo' %>" class="m-0 p-0">
-      </span>
-      <span>
-        <%= @stock.name %><small>($<%= @stock.price %>)</small>
-      </span>
+      $<%= @stock.price %>
     </h1>
   </div>
     <% timespan = @timespan =="day" ? "Daily" : @timespan.upcase + "LY" %>
